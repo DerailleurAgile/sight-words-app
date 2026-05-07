@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagny's Sight Words Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;900&family=Merriweather:wght@700&family=Courier+Prime:wght@700&family=Lexend:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* OpenDyslexic via CDN */
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+    font-weight: normal;
+  }
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+    font-weight: bold;
+  }
+
+  :root {
+    --sky: #e8f4f8;
+    --cream: #fef9f0;
+    --card: #ffffff;
+    --sun: #f5a623;
+    --leaf: #4caf7d;
+    --cloud: #d6eaf8;
+    --ink: #1d2d3e;
+    --muted: #8da0b0;
+    --border: #dce8f0;
+    --shadow-card: 0 12px 48px rgba(29,45,62,0.10), 0 2px 8px rgba(29,45,62,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 340px;
+    background: linear-gradient(180deg, #d6eaf8 0%, transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .title-row h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+  .star { font-size: 1.4rem; }
+
+  .card {
+    width: 100%;
+    background: var(--card);
+    border-radius: 32px;
+    box-shadow: var(--shadow-card);
+    border: 2px solid var(--border);
+    padding: 48px 36px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    min-height: 300px;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover {
+    box-shadow: 0 16px 56px rgba(29,45,62,0.13), 0 2px 8px rgba(29,45,62,0.06);
+  }
+
+  .badge-row {
+    position: absolute;
+    top: 18px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 22px;
+    pointer-events: none;
+  }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+    background: var(--sky);
+    border-radius: 20px;
+    padding: 4px 12px;
+  }
+  .badge.progress { color: var(--leaf); background: #eaf7f0; }
+
+  #wordEl {
+    text-align: center;
+    color: var(--ink);
+    line-height: 1.05;
+    word-break: break-word;
+    max-width: 100%;
+    will-change: transform, opacity;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+  }
+  #wordEl.out {
+    opacity: 0;
+    transform: scale(0.88) translateY(-10px);
+  }
+
+  .nav-hint {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--sky);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #4a6278;
+    box-shadow: 0 2px 0 var(--border);
+    white-space: nowrap;
+  }
+  .sep { color: var(--muted); font-size: 0.75rem; }
+
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    max-width: 500px;
+  }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.25s, transform 0.25s;
+    flex-shrink: 0;
+  }
+  .dot.seen { background: #a8d5bb; }
+  .dot.now  { background: var(--leaf); transform: scale(1.5); }
+
+  .panel {
+    width: 100%;
+    background: var(--card);
+    border-radius: 24px;
+    border: 2px solid var(--border);
+    padding: 22px 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 24px;
+    align-items: flex-end;
+    box-shadow: 0 2px 12px rgba(29,45,62,0.05);
+    transition: max-height 0.35s ease, padding 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    overflow: hidden;
+    max-height: 420px;
+  }
+
+  .panel.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .panel-toggle {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(29,45,62,0.08);
+    transition: all 0.2s;
+  }
+  .panel-toggle:hover {
+    border-color: var(--leaf);
+    color: var(--leaf);
+  }
+  .panel-toggle .arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  .panel.collapsed ~ .panel-toggle .arrow {
+    transform: rotate(180deg);
+  }
+
+  .ctrl {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .ctrl label {
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  select {
+    appearance: none;
+    background: var(--sky) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238da0b0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 9px 34px 9px 13px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  select:focus { border-color: var(--leaf); }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  input[type=range] {
+    flex: 1;
+    accent-color: var(--leaf);
+    height: 6px;
+    cursor: pointer;
+  }
+  .size-val {
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: var(--leaf);
+    min-width: 44px;
+    text-align: right;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--leaf); color: var(--leaf); }
+
+  .editor-section {
+    width: 100%;
+    display: none;
+  }
+  .editor-section.open { display: block; }
+
+  .editor-box {
+    background: var(--card);
+    border-radius: 24px;
+    border: 2px solid var(--border);
+    padding: 22px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(29,45,62,0.05);
+  }
+  .editor-box h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .editor-box p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  textarea {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--sky);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 130px;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--leaf); }
+
+  .editor-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-save {
+    background: var(--leaf);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 22px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  .font-note {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: -3px;
+    min-height: 16px;
+  }
+
+  /* Speech toggle button */
+  .btn-speech {
+    background: none;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .btn-speech:hover { border-color: var(--sun); color: var(--sun); }
+  .btn-speech.active { background: #fff8ee; border-color: var(--sun); color: var(--sun); }
+
+  /* Replay button on card */
+  .btn-replay {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    background: var(--sky);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.15s;
+    pointer-events: all;
+  }
+  .btn-replay:hover { background: #fde8c8; transform: scale(1.1); }
+  .btn-replay.visible { display: flex; }
+
+  /* Speech settings inside panel */
+  .speech-settings {
+    width: 100%;
+    flex: none;
+    display: none;
+    gap: 18px 24px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    padding-top: 14px;
+    border-top: 1.5px solid var(--border);
+  }
+  .speech-settings.visible { display: flex; }
+
+  @media (max-width: 480px) {
+    .card { padding: 36px 18px 30px; min-height: 240px; }
+    .panel { padding: 16px; }
+    .ctrl { min-width: 120px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="title-row">
+    <span class="star">⭐</span>
+    <h1>Dagny's Sight Words Flash Cards</h1>
+    <span class="star">⭐</span>
+  </div>
+
+  <div class="card" id="card" onclick="next()">
+    <div class="badge-row">
+      <span class="badge" id="fontBadge">Nunito</span>
+      <span class="badge progress" id="countBadge">1 / 20</span>
+    </div>
+
+    <div id="wordEl">the</div>
+
+    <div class="nav-hint">
+      <span class="kbd">SPACE / →</span>
+      <span class="sep">next</span>
+      <span class="kbd">← back</span>
+      <span class="sep">·</span>
+      <span class="kbd">tap card</span>
+    </div>
+
+    <button class="btn-replay" id="replayBtn" title="Hear word again" onclick="event.stopPropagation(); speakWord(deck[idx]);">🔊</button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <!-- Control Panel -->
+  <div class="panel" id="controlPanel">
+    <!-- Font -->
+    <div class="ctrl">
+      <label>Font</label>
+      <select id="fontSel" onchange="applyFont()">
+        <option value="Nunito"         data-css="'Nunito', sans-serif"              selected>Nunito (Rounded)</option>
+        <option value="Lexend"         data-css="'Lexend', sans-serif"                     >Lexend (Reading)</option>
+        <option value="Atkinson"       data-css="'Atkinson Hyperlegible', sans-serif"       >Atkinson Hyperlegible</option>
+        <option value="OpenDyslexic"   data-css="'OpenDyslexic', sans-serif"                >OpenDyslexic ★</option>
+        <option value="Baloo 2"        data-css="'Baloo 2', cursive"                        >Baloo 2 (Fun)</option>
+        <option value="Merriweather"   data-css="'Merriweather', serif"                     >Merriweather (Serif)</option>
+        <option value="Courier Prime"  data-css="'Courier Prime', monospace"                >Courier Prime (Mono)</option>
+        <option value="Comic Sans MS"  data-css="'Comic Sans MS', cursive"                  >Comic Sans</option>
+        <option value="Arial"          data-css="'Arial', sans-serif"                       >Arial (Plain)</option>
+      </select>
+      <div class="font-note" id="fontNote"></div>
+    </div>
+
+    <!-- Length -->
+    <div class="ctrl">
+      <label>Length</label>
+      <select id="sessionSel" onchange="updateSession()">
+        <option value="10">10 words</option>
+        <option value="15">15 words</option>
+        <option value="20" selected>20 words</option>
+        <option value="all">Full list</option>
+      </select>
+      <div class="font-note">Prevents fatigue</div>
+    </div>
+
+    <!-- Caps -->
+    <div class="ctrl">
+      <label>Caps</label>
+      <select id="capsSel" onchange="updateCaps()">
+        <option value="off">lowercase</option>
+        <option value="random">Randomized</option>
+      </select>
+      <div class="font-note">Sentence prep</div>
+    </div>
+
+    <!-- Font Size — full width, own row -->
+    <div class="ctrl" style="width:100%; flex:none;">
+      <label>Font Size</label>
+      <div class="slider-row">
+        <input type="range" id="sizeSel" min="60" max="280" value="160" step="10" oninput="applyFont()">
+        <span class="size-val" id="sizeVal">160px</span>
+      </div>
+    </div>
+
+    <!-- Speech settings — shown only when speech is on -->
+    <div class="speech-settings" id="speechSettings">
+      <div class="ctrl">
+        <label>Voice</label>
+        <select id="voiceSel" onchange="applyVoice()">
+          <option value="">Default</option>
+        </select>
+        <div class="font-note">English voices only</div>
+      </div>
+      <div class="ctrl">
+        <label>Speed</label>
+        <div class="slider-row">
+          <input type="range" id="speedSel" min="0.5" max="1.5" value="0.85" step="0.05" oninput="updateSpeedLabel()">
+          <span class="size-val" id="speedVal">0.85×</span>
+        </div>
+        <div class="font-note">Slower helps comprehension</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Toggle Button -->
+  <button class="panel-toggle" id="panelToggle" onclick="togglePanel()">
+    ⚙️ Settings <span class="arrow">▼</span>
+  </button>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <button class="btn-ghost" onclick="prev()">← Back</button>
+    <button class="btn-ghost" onclick="reshuffle()">🔀 Reshuffle</button>
+    <button class="btn-speech" id="speechToggle" onclick="toggleSpeech()">🔇 Read Aloud: Off</button>
+    <button class="btn-ghost" id="editToggle" onclick="toggleEditor()">✏️ Edit Words</button>
+  </div>
+
+  <div class="editor-section" id="editorSection">
+    <div class="editor-box">
+      <h3>📝 Word List</h3>
+      <p>One word per line. Edit to match exactly what she's working on in Reader.com, then hit Save.</p>
+      <textarea id="wordArea"></textarea>
+      <div class="editor-actions">
+        <button class="btn-save" onclick="saveWords()">Save Words</button>
+        <button class="btn-ghost" onclick="toggleEditor()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Word list, utilities, render, navigation, font functions, etc. (unchanged) ──
+const DEFAULTS = [
+  "the","this","here","looks","said","have","come","some","there","they",
+  "where","were","what","who","would","could","should","want","like",
+  "little","pretty","very","once","upon","your","their","again","around",
+  "because","before","every","found","goes","know","made","many","only",
+  "right","show","those","through","together","which","write","always","two","one",
+  "a", "and", "I", "is", "it", "to", "for", "you", "that", "was", "are", "be", "with", 
+  "his", "he", "as", "at", "on", "but", "had", "not", "she", "can", "do", "we", "when", 
+  "an", "if", "up", "so"
+];
+
+let autoSpeak  = false;
+let voices     = [];
+let chosenVoice = null;
+
+// ── Speech ────────────────────────────────────────────────────────────────────
+function loadVoices() {
+  const all = speechSynthesis.getVoices();
+  // Keep English voices only, prefer en-GB / en-AU / en-US
+  voices = all.filter(v => v.lang.startsWith('en'));
+  const sel = document.getElementById('voiceSel');
+  sel.innerHTML = '<option value="">Default</option>';
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${v.name} (${v.lang})`;
+    sel.appendChild(opt);
+  });
+}
+
+// Voices load asynchronously — try immediately and on the event
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function applyVoice() {
+  const idx = document.getElementById('voiceSel').value;
+  chosenVoice = idx === '' ? null : voices[parseInt(idx)];
+}
+
+function updateSpeedLabel() {
+  const v = parseFloat(document.getElementById('speedSel').value).toFixed(2);
+  document.getElementById('speedVal').textContent = `${v}×`;
+}
+
+function speakWord(word) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(word.toLowerCase());
+  utt.rate  = parseFloat(document.getElementById('speedSel').value);
+  utt.pitch = 1.1;
+  if (chosenVoice) utt.voice = chosenVoice;
+  speechSynthesis.speak(utt);
+}
+
+function toggleSpeech() {
+  autoSpeak = !autoSpeak;
+  const btn = document.getElementById('speechToggle');
+  btn.textContent = autoSpeak ? '🔊 Read Aloud: On' : '🔇 Read Aloud: Off';
+  btn.classList.toggle('active', autoSpeak);
+  document.getElementById('speechSettings').classList.toggle('visible', autoSpeak);
+  document.getElementById('replayBtn').classList.toggle('visible', autoSpeak);
+  if (autoSpeak) speakWord(deck[idx]);
+  else speechSynthesis.cancel();
+}
+
+let words      = [...DEFAULTS];
+let deck       = [];
+let idx        = 0;
+let randomCaps = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function formatWord(word) {
+  if (randomCaps && Math.random() > 0.5) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+  if (word === 'I') return "I";
+  return word.toLowerCase();
+}
+
+function buildDots() {
+  const c = document.getElementById('dots');
+  c.innerHTML = '';
+  deck.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < idx ? ' seen' : i === idx ? ' now' : '');
+    c.appendChild(d);
+  });
+}
+
+function showWord() {
+  const el = document.getElementById('wordEl');
+  el.classList.add('out');
+  setTimeout(() => {
+    el.textContent = formatWord(deck[idx]);
+    el.classList.remove('out');
+    document.getElementById('countBadge').textContent = `${idx + 1} / ${deck.length}`;
+    buildDots();
+    if (autoSpeak) speakWord(deck[idx]);
+  }, 120);
+}
+
+function next() {
+  if (idx < deck.length - 1) idx++;
+  else idx = 0;
+  showWord();
+}
+
+function prev() {
+  if (idx > 0) idx--;
+  else idx = deck.length - 1;
+  showWord();
+}
+
+function reshuffle() {
+  const limit = document.getElementById('sessionSel').value;
+  const count = limit === 'all' ? words.length : parseInt(limit);
+  deck = shuffle(words).slice(0, count);
+  idx  = 0;
+  showWord();
+}
+
+function updateSession() {
+  reshuffle();
+}
+
+const FONT_NOTES = {
+  'OpenDyslexic':  '★ Weighted bottoms reduce letter-flipping',
+  'Atkinson':      'Designed for low-vision readers',
+  'Lexend':        'Engineered to reduce visual stress',
+  'Nunito':        'Rounded, friendly letterforms',
+  'Merriweather':  'Strong serif — high contrast strokes',
+  'Courier Prime': 'Fixed-width — each letter takes equal space',
+  'Comic Sans MS': 'Asymmetric letterforms — familiar for assessment',
+  'Arial':         'Standard sans-serif baseline',
+  'Baloo 2':       'Playful display font',
+};
+
+function applyFont() {
+  const sel  = document.getElementById('fontSel');
+  const opt  = sel.options[sel.selectedIndex];
+  const css  = opt.getAttribute('data-css');
+  const name = opt.value;
+  const size = document.getElementById('sizeSel').value;
+
+  document.getElementById('wordEl').style.fontFamily = css;
+  document.getElementById('wordEl').style.fontSize   = size + 'px';
+  document.getElementById('sizeVal').textContent      = size + 'px';
+  document.getElementById('fontBadge').textContent    = name;
+  document.getElementById('fontNote').textContent     = FONT_NOTES[name] || '';
+}
+
+function updateCaps() {
+  randomCaps = document.getElementById('capsSel').value === 'random';
+  const el = document.getElementById('wordEl');
+  el.textContent = formatWord(deck[idx]);
+}
+
+function togglePanel() {
+  document.getElementById('controlPanel').classList.toggle('collapsed');
+}
+
+function toggleEditor() {
+  const sec = document.getElementById('editorSection');
+  const open = sec.classList.toggle('open');
+  document.getElementById('editToggle').textContent = open ? '✕ Close' : '✏️ Edit Words';
+  if (open) document.getElementById('wordArea').value = words.join('\n');
+}
+
+function saveWords() {
+  const raw = document.getElementById('wordArea').value;
+  const parsed = raw.split('\n').map(w => w.trim()).filter(Boolean);
+  if (!parsed.length) return;
+  words = parsed;
+  reshuffle();
+  toggleEditor();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowRight') { e.preventDefault(); next(); }
+  if (e.code === 'ArrowLeft') { e.preventDefault(); prev(); }
+  if (e.code === 'KeyR') { e.preventDefault(); reshuffle(); }
+  if (e.code === 'KeyS') { e.preventDefault(); if (autoSpeak) speakWord(deck[idx]); }
+});
+
+function init() {
+  const limit = document.getElementById('sessionSel').value;
+  const count = limit === 'all' ? words.length : parseInt(limit);
+  deck = shuffle(words).slice(0, count);
+  idx  = 0;
+  document.getElementById('wordEl').textContent   = formatWord(deck[0]);
+  document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
+  buildDots();
+  applyFont();
+}
+
+init();
+</script>
+</body>
+</html>

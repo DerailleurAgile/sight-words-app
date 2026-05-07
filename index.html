@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagny's Sight Words Flashcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;900&family=Merriweather:wght@700&family=Courier+Prime:wght@700&family=Lexend:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="title-row">
+    <span class="star">⭐</span>
+    <h1>Dagny's Sight Words Flash Cards</h1>
+    <span class="star">⭐</span>
+  </div>
+
+  <div class="card" id="card" onclick="next()">
+    <div class="badge-row">
+      <span class="badge" id="fontBadge">Nunito</span>
+      <span class="badge progress" id="countBadge">1 / 20</span>
+    </div>
+
+    <div id="wordEl">the</div>
+
+    <div class="nav-hint">
+      <button class="btn-nav" onclick="event.stopPropagation(); prev();">←</button>
+      <button class="btn-nav btn-nav-next" onclick="event.stopPropagation(); next();">→</button>
+    </div>
+
+    <button class="btn-replay" id="replayBtn" title="Hear word again" onclick="event.stopPropagation(); speakWord(deck[idx]);">🔊</button>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <!-- Control Panel -->
+  <div class="panel" id="controlPanel">
+    <!-- Font -->
+    <div class="ctrl">
+      <label>Font</label>
+      <select id="fontSel" onchange="applyFont()">
+        <option value="Nunito"         data-css="'Nunito', sans-serif"              selected>Nunito (Rounded)</option>
+        <option value="Lexend"         data-css="'Lexend', sans-serif"                      >Lexend (Reading)</option>
+        <option value="Atkinson"       data-css="'Atkinson Hyperlegible', sans-serif"        >Atkinson Hyperlegible</option>
+        <option value="OpenDyslexic"   data-css="'OpenDyslexic', sans-serif"                 >OpenDyslexic ★</option>
+        <option value="Baloo 2"        data-css="'Baloo 2', cursive"                         >Baloo 2 (Fun)</option>
+        <option value="Merriweather"   data-css="'Merriweather', serif"                      >Merriweather (Serif)</option>
+        <option value="Courier Prime"  data-css="'Courier Prime', monospace"                 >Courier Prime (Mono)</option>
+        <option value="Comic Sans MS"  data-css="'Comic Sans MS', cursive"                   >Comic Sans</option>
+        <option value="Arial"          data-css="'Arial', sans-serif"                        >Arial (Plain)</option>
+      </select>
+      <div class="font-note" id="fontNote"></div>
+    </div>
+
+    <!-- Length -->
+    <div class="ctrl">
+      <label>Length</label>
+      <select id="sessionSel" onchange="updateSession()">
+        <option value="10">10 words</option>
+        <option value="15">15 words</option>
+        <option value="20" selected>20 words</option>
+        <option value="all">Full list</option>
+      </select>
+      <div class="font-note">Prevents fatigue</div>
+    </div>
+
+    <!-- Caps -->
+    <div class="ctrl">
+      <label>Caps</label>
+      <select id="capsSel" onchange="updateCaps()">
+        <option value="off">lowercase</option>
+        <option value="random">Randomized</option>
+      </select>
+      <div class="font-note">Sentence prep</div>
+    </div>
+
+    <!-- Font Size — full width, own row -->
+    <div class="ctrl" style="width:100%; flex:none;">
+      <label>Font Size</label>
+      <div class="slider-row">
+        <input type="range" id="sizeSel" min="60" max="280" value="160" step="10" oninput="applyFont()">
+        <span class="size-val" id="sizeVal">160px</span>
+      </div>
+    </div>
+
+    <!-- Speech settings — shown only when speech is on -->
+    <div class="speech-settings" id="speechSettings">
+      <div class="ctrl">
+        <label>Voice</label>
+        <select id="voiceSel" onchange="applyVoice()">
+          <option value="">Default</option>
+        </select>
+        <div class="font-note">English voices only</div>
+      </div>
+      <div class="ctrl">
+        <label>Speed</label>
+        <div class="slider-row">
+          <input type="range" id="speedSel" min="0.5" max="1.5" value="0.85" step="0.05" oninput="updateSpeedLabel()">
+          <span class="size-val" id="speedVal">0.85×</span>
+        </div>
+        <div class="font-note">Slower helps comprehension</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Toggle Button -->
+  <button class="panel-toggle" id="panelToggle" onclick="togglePanel()">
+    ⚙️ Settings <span class="arrow">▼</span>
+  </button>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <button class="btn-ghost" onclick="prev()">← Back</button>
+    <button class="btn-ghost" onclick="reshuffle()">🔀 Reshuffle</button>
+    <button class="btn-speech" id="speechToggle" onclick="toggleSpeech()">🔇 Read Aloud: Off</button>
+    <button class="btn-ghost" id="editToggle" onclick="toggleEditor()">✏️ Edit Words</button>
+  </div>
+
+  <div class="editor-section" id="editorSection">
+    <div class="editor-box">
+      <h3>📝 Word List</h3>
+      <p>One word per line. Edit below, or load from a text file.</p>
+      <textarea id="wordArea"></textarea>
+      
+      <div class="editor-actions">
+        <button class="btn-save" onclick="saveWords()">Save Words</button>
+        
+        <!-- NEW: File Load Button -->
+        <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="loadFromFile(event)">
+        <button class="btn-ghost" onclick="document.getElementById('fileInput').click()">📁 Load from .txt</button>
+        
+        <button class="btn-ghost" onclick="toggleEditor()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>

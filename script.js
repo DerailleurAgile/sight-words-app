@@ -42,6 +42,7 @@ function loadVoices() {
   const sel = document.getElementById('voiceSel');
   if (!sel) return;
   const all = speechSynthesis.getVoices();
+  voices = all.filter(v => v.lang.startsWith('en'));
   sel.innerHTML = '<option value="">Default</option>';
   voices.forEach((v, i) => {
     const opt = document.createElement('option');

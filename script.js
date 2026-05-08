@@ -36,6 +36,7 @@ let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
+const spellSpeedMultiplier = 1.65; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function loadVoices() {
@@ -104,7 +105,7 @@ function speakWord(word) {
     // Brief pause then each letter — all queued upfront, no onend chaining needed
     speechSynthesis.speak(makeUtt('.', rate, 1.0));
     word.toLowerCase().replace(/[^a-z]/g, '').split('').forEach(letter => {
-      speechSynthesis.speak(makeUtt(PHONETIC[letter] || letter, Math.max(rate * 1.35, 0.5), 1.0));
+      speechSynthesis.speak(makeUtt(PHONETIC[letter] || letter, Math.max(rate * spellSpeedMultiplier, 0.5), 1.0));
     });
   }
 }

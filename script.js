@@ -37,11 +37,13 @@ if (speechSynthesis.onvoiceschanged !== undefined) {
 function applyVoice() {
   const idx = document.getElementById('voiceSel').value;
   chosenVoice = idx === '' ? null : voices[parseInt(idx)];
+  saveSettings();
 }
 
 function updateSpeedLabel() {
   const v = parseFloat(document.getElementById('speedSel').value).toFixed(2);
   document.getElementById('speedVal').textContent = `${v}×`;
+  saveSettings();
 }
 
 function speakWord(word) {
@@ -49,7 +51,7 @@ function speakWord(word) {
   speechSynthesis.cancel();
 
   const rate = parseFloat(document.getElementById('speedSel').value);
-  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jate', z:'zed' };
+  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
 
   function makeUtt(text, r, pitch) {
     const utt = new SpeechSynthesisUtterance(text);
@@ -77,6 +79,7 @@ function toggleSpell() {
   btn.textContent = autoSpell ? '🔤 Spell It: On' : '🔤 Spell It: Off';
   btn.classList.toggle('active', autoSpell);
   if (autoSpeak) speakWord(deck[idx]);
+  saveSettings();
 }
 
 function toggleSpeech() {
@@ -95,6 +98,7 @@ function toggleSpeech() {
   }
   if (autoSpeak) speakWord(deck[idx]);
   else speechSynthesis.cancel();
+  saveSettings();
 }
 
 let words      = [...DEFAULTS];
@@ -189,12 +193,13 @@ function applyFont() {
   document.getElementById('sizeVal').textContent      = size + 'px';
   document.getElementById('fontBadge').textContent    = name;
   document.getElementById('fontNote').textContent     = FONT_NOTES[name] || '';
+  saveSettings();
 }
 
 function updateCaps() {
   randomCaps = document.getElementById('capsSel').value === 'random';
-  const el = document.getElementById('wordEl');
-  el.textContent = formatWord(deck[idx]);
+  document.getElementById('wordEl').textContent = formatWord(deck[idx]);
+  saveSettings();
 }
 
 function togglePanel() {
@@ -217,7 +222,35 @@ function saveWords() {
   toggleEditor();
 }
 
-// ── NEW: LOAD FROM FILE LOGIC ───────────────────────────────────────────────
+// ── Settings persistence ──────────────────────────────────────────────────────
+function saveSettings() {
+  const settings = {
+    font:      document.getElementById('fontSel').value,
+    fontSize:  document.getElementById('sizeSel').value,
+    session:   document.getElementById('sessionSel').value,
+    caps:      document.getElementById('capsSel').value,
+    speed:     document.getElementById('speedSel').value,
+    voiceIdx:  document.getElementById('voiceSel').value,
+    autoSpeak,
+    autoSpell,
+  };
+  localStorage.setItem('dagny-settings', JSON.stringify(settings));
+}
+
+function loadSettings() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem('dagny-settings')); } catch(e) {}
+  if (!s) return null;
+  if (s.font)     document.getElementById('fontSel').value     = s.font;
+  if (s.fontSize) document.getElementById('sizeSel').value     = s.fontSize;
+  if (s.session)  document.getElementById('sessionSel').value  = s.session;
+  if (s.caps)     document.getElementById('capsSel').value     = s.caps;
+  if (s.speed)    document.getElementById('speedSel').value    = s.speed;
+  if (s.voiceIdx) document.getElementById('voiceSel').value    = s.voiceIdx;
+  return s;
+}
+
+// ── LOAD FROM FILE LOGIC ──────────────────────────────────────────────────────
 function loadFromFile(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -249,29 +282,38 @@ document.addEventListener('keydown', e => {
 });
 
 function init() {
+  const saved = loadSettings();
+
   const limit = document.getElementById('sessionSel').value;
   const count = limit === 'all' ? words.length : parseInt(limit);
   deck = shuffle(words).slice(0, count);
   idx  = 0;
   document.getElementById('wordEl').textContent     = formatWord(deck[0]);
   document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
-  document.getElementById('speedVal').textContent   = '1.00×';
+  document.getElementById('speedVal').textContent   =
+    parseFloat(document.getElementById('speedSel').value).toFixed(2) + '×';
   buildDots();
   applyFont();
+  randomCaps = document.getElementById('capsSel').value === 'random';
 
-  // Start with Read Aloud on
-  autoSpeak = true;
-  document.getElementById('speechToggle').textContent = '🔊 Read Aloud: On';
-  document.getElementById('speechToggle').classList.add('active');
-  document.getElementById('speechSettings').classList.add('visible');
-  document.getElementById('replayBtn').classList.add('visible');
+  // Restore or default autoSpeak on
+  const wantSpeak = saved ? saved.autoSpeak !== false : true;
+  const wantSpell = saved ? saved.autoSpell === true  : true;
 
-  // Start with Spell It on
-  autoSpell = true;
-  const spellBtn = document.getElementById('spellToggle');
-  spellBtn.style.display = '';
-  spellBtn.textContent = '🔤 Spell It: On';
-  spellBtn.classList.add('active');
+  if (wantSpeak) {
+    autoSpeak = true;
+    document.getElementById('speechToggle').textContent = '🔊 Read Aloud: On';
+    document.getElementById('speechToggle').classList.add('active');
+    document.getElementById('speechSettings').classList.add('visible');
+    document.getElementById('replayBtn').classList.add('visible');
+    const spellBtn = document.getElementById('spellToggle');
+    spellBtn.style.display = '';
+    if (wantSpell) {
+      autoSpell = true;
+      spellBtn.textContent = '🔤 Spell It: On';
+      spellBtn.classList.add('active');
+    }
+  }
 
   speakWord(deck[0]);
 }

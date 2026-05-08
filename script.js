@@ -11,14 +11,15 @@ const DEFAULTS = [
 ];
 
 let autoSpeak  = false;
+let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function loadVoices() {
-  const all = speechSynthesis.getVoices();
-  voices = all.filter(v => v.lang.startsWith('en'));
   const sel = document.getElementById('voiceSel');
+  if (!sel) return;
+  const all = speechSynthesis.getVoices();
   sel.innerHTML = '<option value="">Default</option>';
   voices.forEach((v, i) => {
     const opt = document.createElement('option');

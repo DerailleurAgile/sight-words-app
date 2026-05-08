@@ -10,17 +10,15 @@ const DEFAULTS = [
   "an", "if", "up", "so"
 ];
 
-let autoSpeak   = false;
-let autoSpell   = false;
-let voices      = [];
+let autoSpeak  = false;
+let voices     = [];
 let chosenVoice = null;
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function loadVoices() {
-  const sel = document.getElementById('voiceSel');
-  if (!sel) return;
   const all = speechSynthesis.getVoices();
   voices = all.filter(v => v.lang.startsWith('en'));
+  const sel = document.getElementById('voiceSel');
   sel.innerHTML = '<option value="">Default</option>';
   voices.forEach((v, i) => {
     const opt = document.createElement('option');
@@ -50,33 +48,26 @@ function speakWord(word) {
   speechSynthesis.cancel();
 
   const rate = parseFloat(document.getElementById('speedSel').value);
+  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why' };
 
-  // Speak the whole word first
-  const wordUtt = new SpeechSynthesisUtterance(word.toLowerCase());
-  wordUtt.rate  = rate;
-  wordUtt.pitch = 1.1;
-  if (chosenVoice) wordUtt.voice = chosenVoice;
-
-  if (autoSpell) {
-    // After the word finishes, spell each letter with a short pause between
-    wordUtt.onend = () => {
-      const letters = word.toLowerCase().replace(/[^a-z]/g, '').split('');
-      let i = 0;
-      function nextLetter() {
-        if (i >= letters.length) return;
-        const utt = new SpeechSynthesisUtterance(letters[i++]);
-        utt.rate  = Math.max(rate * 1.25, 0.5); // slightly slower for clarity
-        utt.pitch = 1.0;
-        if (chosenVoice) utt.voice = chosenVoice;
-        utt.onend = nextLetter;
-        speechSynthesis.speak(utt);
-      }
-      // Small pause before spelling starts
-      setTimeout(nextLetter, 400);
-    };
+  function makeUtt(text, r, pitch) {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate  = r;
+    utt.pitch = pitch;
+    if (chosenVoice) utt.voice = chosenVoice;
+    return utt;
   }
 
-  speechSynthesis.speak(wordUtt);
+  // Queue the whole word first
+  speechSynthesis.speak(makeUtt(word.toLowerCase(), rate, 1.1));
+
+  if (autoSpell) {
+    // Brief pause then each letter — all queued upfront, no onend chaining needed
+    speechSynthesis.speak(makeUtt('.', rate, 1.0));
+    word.toLowerCase().replace(/[^a-z]/g, '').split('').forEach(letter => {
+      speechSynthesis.speak(makeUtt(PHONETIC[letter] || letter, Math.max(rate * 1.35, 0.5), 1.0));
+    });
+  }
 }
 
 function toggleSpell() {
@@ -94,7 +85,6 @@ function toggleSpeech() {
   btn.classList.toggle('active', autoSpeak);
   document.getElementById('speechSettings').classList.toggle('visible', autoSpeak);
   document.getElementById('replayBtn').classList.toggle('visible', autoSpeak);
-  // Show/hide Spell It button with Read Aloud
   const spellBtn = document.getElementById('spellToggle');
   spellBtn.style.display = autoSpeak ? '' : 'none';
   if (!autoSpeak) {
@@ -262,10 +252,27 @@ function init() {
   const count = limit === 'all' ? words.length : parseInt(limit);
   deck = shuffle(words).slice(0, count);
   idx  = 0;
-  document.getElementById('wordEl').textContent   = formatWord(deck[0]);
+  document.getElementById('wordEl').textContent     = formatWord(deck[0]);
   document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
+  document.getElementById('speedVal').textContent   = '1.00×';
   buildDots();
   applyFont();
+
+  // Start with Read Aloud on
+  autoSpeak = true;
+  document.getElementById('speechToggle').textContent = '🔊 Read Aloud: On';
+  document.getElementById('speechToggle').classList.add('active');
+  document.getElementById('speechSettings').classList.add('visible');
+  document.getElementById('replayBtn').classList.add('visible');
+
+  // Start with Spell It on
+  autoSpell = true;
+  const spellBtn = document.getElementById('spellToggle');
+  spellBtn.style.display = '';
+  spellBtn.textContent = '🔤 Spell It: On';
+  spellBtn.classList.add('active');
+
+  speakWord(deck[0]);
 }
 
 init();

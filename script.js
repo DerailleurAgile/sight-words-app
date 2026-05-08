@@ -150,6 +150,9 @@ function speakWord(word) {
     word.toLowerCase().replace(/[^a-z]/g, '').split('').forEach(letter => { // ← original word
       speechSynthesis.speak(makeUtt(PHONETIC[letter] || letter, Math.max(rate * spellSpeedMultiplier, 0.5), 1.0));
     });
+
+    // Repeat the word at the end of the spelling for reinforcement
+    speechSynthesis.speak(makeUtt(spoken, rate, 1.1));   
   }
 }
 

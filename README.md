@@ -1,8 +1,10 @@
-# ⭐ Dagny's Words
+# ⭐ Dagny's Words ⭐
 ### Sight Word Flash Card App
 *(c) 2026 CR Chapman*
 
 A dyslexia-friendly sight word flashcard app with text-to-speech, phonetic spelling, and customisable word lists.
+
+**[▶ Try it live](https://derailleuragile.github.io/sight-words-app/)**
 
 ---
 

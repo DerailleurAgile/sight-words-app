@@ -56,7 +56,7 @@ const WORD_PHONETICS = {
   'their':  'there',
   'here':   'heer',
   'have':   'have',
-  'come':   'kum',
+  'come':   'kuhm',
   'some':   'sum',
   'said':   'sed',
   'been':   'bin',
@@ -79,7 +79,7 @@ let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
-const spellSpeedMultiplier = 1.65; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
+const spellSpeedMultiplier = 3.0; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
 let currentWordListName = '';
 
 // ── Speech ────────────────────────────────────────────────────────────────────

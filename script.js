@@ -49,7 +49,7 @@ function speakWord(word) {
   speechSynthesis.cancel();
 
   const rate = parseFloat(document.getElementById('speedSel').value);
-  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why' };
+  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jate', z:'zed' };
 
   function makeUtt(text, r, pitch) {
     const utt = new SpeechSynthesisUtterance(text);

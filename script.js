@@ -1,8 +1,8 @@
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║                                                                  ║
-// ║                        ⭐  DAGNY'S WORDS  ⭐                    ║
-// ║                      Sight Word Flash Card App                   ║
-// ║                         (c) 2026 CR Chapman                      ║
+// ║                    ⭐ DAGNY'S WORDS  ⭐                         ║
+// ║                   Sight Word Flash Card App                      ║
+// ║                     (c) 2026 CR Chapman                          ║
 // ║                                                                  ║
 // ║   Features:                                                      ║
 // ║   • Randomised sight word flashcards                             ║
@@ -21,16 +21,29 @@
 // ╚══════════════════════════════════════════════════════════════════╝
 
 // ── Word list ─────────────────────────────────────────────────────────────────
-const DEFAULTS = [
-  "the","this","here","looks","said","have","come","some","there","they",
-  "where","were","what","who","would","could","should","want","like",
-  "little","pretty","very","once","upon","your","their","again","around",
-  "because","before","every","found","goes","know","made","many","only",
-  "right","show","those","through","together","which","write","always","two","one",
-  "a", "and", "I", "is", "it", "to", "for", "you", "that", "was", "are", "be", "with", 
-  "his", "he", "as", "at", "on", "but", "had", "not", "she", "can", "do", "we", "when", 
-  "an", "if", "up", "so"
-];
+// const DEFAULTS = [
+//   "the","this","here","looks","said","have","come","some","there","they",
+//   "where","were","what","who","would","could","should","want","like",
+//   "little","pretty","very","once","upon","your","their","again","around",
+//   "because","before","every","found","goes","know","made","many","only",
+//   "right","show","those","through","together","which","write","always","two","one",
+//   "a", "and", "I", "is", "it", "to", "for", "you", "that", "was", "are", "be", "with", 
+//   "his", "he", "as", "at", "on", "but", "had", "not", "she", "can", "do", "we", "when", 
+//   "an", "if", "up", "so"
+// ];
+
+let DEFAULTS = [];
+async function fetchDefaults() {
+  try {
+    const res = await fetch('defaults.txt');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return text.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
+  } catch(e) {
+    console.warn('Could not load defaults.txt:', e);
+    return ['there','is','no','default', 'words', 'text','file','please','replace','it']; // minimal fallback
+  }
+}
 
 const WORD_PHONETICS = {
   'the':    'thah',
@@ -372,7 +385,11 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyS') { e.preventDefault(); if (autoSpeak) speakWord(deck[idx]); }
 });
 
-function init() {
+async function init() {
+  
+  DEFAULTS = await fetchDefaults();
+  words = [...DEFAULTS];
+  
   const saved = loadSettings();
 
   if (saved?.wordList?.length) {           

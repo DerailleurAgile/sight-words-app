@@ -60,11 +60,13 @@ const WORD_PHONETICS = {
   'will':    'wil',
 };
 
+// ── Global Variables ──────────────────────────────────────────────────────────
 let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
 const spellSpeedMultiplier = 1.65; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
+let currentWordListName = '';
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function loadVoices() {
@@ -282,6 +284,7 @@ function saveWords() {
   const parsed = raw.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
   if (!parsed.length) return;
   words = parsed;
+  saveSettings(); // Save the new word list to settings for persistence
   reshuffle();
   toggleEditor();
 }
@@ -304,6 +307,8 @@ function saveSettings() {
     voiceIdx:  voices.length > 0 ? document.getElementById('voiceSel').value : existingVoiceIdx,
     autoSpeak,
     autoSpell,
+    wordList:     [...words], // Store the current word list in settings for persistence
+    wordListName: currentWordListName, // Store the name of the currently loaded word list
   };
   localStorage.setItem('dagny-settings', JSON.stringify(settings));
   console.log('Saved settings:', settings);
@@ -329,6 +334,7 @@ function loadSettings() {
 function loadFromFile(event) {
   const file = event.target.files[0];
   if (!file) return;
+  currentWordListName = file.name; // NEW! Store the name of the currently loaded word list
 
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -359,14 +365,21 @@ document.addEventListener('keydown', e => {
 function init() {
   const saved = loadSettings();
 
+  if (saved?.wordList?.length) {           
+    words = saved.wordList;
+    currentWordListName = saved.wordListName || '';
+  }
+
   const limit = document.getElementById('sessionSel').value;
   const count = limit === 'all' ? words.length : parseInt(limit);
   deck = shuffle(words).slice(0, count);
   idx  = 0;
+  
   document.getElementById('wordEl').textContent     = formatWord(deck[0]);
   document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
   document.getElementById('speedVal').textContent   =
     parseFloat(document.getElementById('speedSel').value).toFixed(2) + '×';
+  
   buildDots();
   applyFont();
   randomCaps = document.getElementById('capsSel').value === 'random';

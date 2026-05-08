@@ -36,6 +36,7 @@ const WORD_PHONETICS = {
   'the':    'thah',
   'a':      'uh',
   'are':    'ahre',
+  'an':     'anne',
   'were':   'wur',
   'where':  'wair',
   'there':  'there',

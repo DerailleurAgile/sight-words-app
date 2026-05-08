@@ -32,6 +32,34 @@ const DEFAULTS = [
   "an", "if", "up", "so"
 ];
 
+const WORD_PHONETICS = {
+  'the':    'thah',
+  'a':      'uh',
+  'are':    'ahre',
+  'were':   'wur',
+  'where':  'wair',
+  'there':  'there',
+  'their':  'thuhr',
+  'here':   'heer',
+  'have':   'hav',
+  'come':   'kum',
+  'some':   'sum',
+  'said':   'sed',
+  'been':   'bin',
+  'does':   'duz',
+  'done':   'dun',
+  'once':   'wuns',
+  'one':    'one',
+  'two':    'too',
+  'would':  'wood',
+  'could':  'kood',
+  'should': 'shood',
+  'your':   'yore',
+  'their':  'thair',
+  'who':    'hoo',
+  'because': 'bee-cuz',
+};
+
 let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
@@ -87,7 +115,8 @@ function speakWord(word) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
 
-  const rate = parseFloat(document.getElementById('speedSel').value);
+  const rate   = parseFloat(document.getElementById('speedSel').value);
+  const spoken = WORD_PHONETICS[word.toLowerCase()] || word.toLowerCase(); // ← phonetic sub
   const PHONETIC = { a:'eigh', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
 
   function makeUtt(text, r, pitch) {
@@ -98,13 +127,11 @@ function speakWord(word) {
     return utt;
   }
 
-  // Queue the whole word first
-  speechSynthesis.speak(makeUtt(word.toLowerCase(), rate, 1.1));
+  speechSynthesis.speak(makeUtt(spoken, rate, 1.1)); // ← uses phonetic form
 
   if (autoSpell) {
-    // Brief pause then each letter — all queued upfront, no onend chaining needed
     speechSynthesis.speak(makeUtt('.', rate, 1.0));
-    word.toLowerCase().replace(/[^a-z]/g, '').split('').forEach(letter => {
+    word.toLowerCase().replace(/[^a-z]/g, '').split('').forEach(letter => { // ← original word
       speechSynthesis.speak(makeUtt(PHONETIC[letter] || letter, Math.max(rate * spellSpeedMultiplier, 0.5), 1.0));
     });
   }

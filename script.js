@@ -289,6 +289,15 @@ function saveWords() {
   toggleEditor();
 }
 
+function restoreDefaults() {
+  words = [...DEFAULTS];
+  currentWordListName = '';
+  document.getElementById('wordArea').value = words.join('\n');
+  saveSettings();
+  reshuffle();
+  toggleEditor();
+}
+
 // ── Settings persistence ──────────────────────────────────────────────────────
 function saveSettings() {
   let existingVoiceIdx = '';

@@ -50,14 +50,6 @@ function loadVoices() {
     opt.textContent = `${v.name} (${v.lang})`;
     sel.appendChild(opt);
   });
-  // Restore saved voice after dropdown is populated
-  try {
-    const s = JSON.parse(localStorage.getItem('dagny-settings'));
-    if (s && s.voiceIdx) {
-      sel.value = s.voiceIdx;
-      chosenVoice = voices[parseInt(s.voiceIdx)] || null;
-    }
-  } catch(e) {}
 }
 
 loadVoices();
@@ -82,7 +74,7 @@ function speakWord(word) {
   speechSynthesis.cancel();
 
   const rate = parseFloat(document.getElementById('speedSel').value);
-  const PHONETIC = { a:'eigh', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
+  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
 
   function makeUtt(text, r, pitch) {
     const utt = new SpeechSynthesisUtterance(text);

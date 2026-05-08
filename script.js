@@ -10,8 +10,9 @@ const DEFAULTS = [
   "an", "if", "up", "so"
 ];
 
-let autoSpeak  = false;
-let voices     = [];
+let autoSpeak   = false;
+let autoSpell   = false;
+let voices      = [];
 let chosenVoice = null;
 
 // ── Speech ────────────────────────────────────────────────────────────────────
@@ -47,11 +48,43 @@ function updateSpeedLabel() {
 function speakWord(word) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(word.toLowerCase());
-  utt.rate  = parseFloat(document.getElementById('speedSel').value);
-  utt.pitch = 1.1;
-  if (chosenVoice) utt.voice = chosenVoice;
-  speechSynthesis.speak(utt);
+
+  const rate = parseFloat(document.getElementById('speedSel').value);
+
+  // Speak the whole word first
+  const wordUtt = new SpeechSynthesisUtterance(word.toLowerCase());
+  wordUtt.rate  = rate;
+  wordUtt.pitch = 1.1;
+  if (chosenVoice) wordUtt.voice = chosenVoice;
+
+  if (autoSpell) {
+    // After the word finishes, spell each letter with a short pause between
+    wordUtt.onend = () => {
+      const letters = word.toLowerCase().replace(/[^a-z]/g, '').split('');
+      let i = 0;
+      function nextLetter() {
+        if (i >= letters.length) return;
+        const utt = new SpeechSynthesisUtterance(letters[i++]);
+        utt.rate  = Math.max(rate * 1.25, 0.5); // slightly slower for clarity
+        utt.pitch = 1.0;
+        if (chosenVoice) utt.voice = chosenVoice;
+        utt.onend = nextLetter;
+        speechSynthesis.speak(utt);
+      }
+      // Small pause before spelling starts
+      setTimeout(nextLetter, 400);
+    };
+  }
+
+  speechSynthesis.speak(wordUtt);
+}
+
+function toggleSpell() {
+  autoSpell = !autoSpell;
+  const btn = document.getElementById('spellToggle');
+  btn.textContent = autoSpell ? '🔤 Spell It: On' : '🔤 Spell It: Off';
+  btn.classList.toggle('active', autoSpell);
+  if (autoSpeak) speakWord(deck[idx]);
 }
 
 function toggleSpeech() {
@@ -61,6 +94,14 @@ function toggleSpeech() {
   btn.classList.toggle('active', autoSpeak);
   document.getElementById('speechSettings').classList.toggle('visible', autoSpeak);
   document.getElementById('replayBtn').classList.toggle('visible', autoSpeak);
+  // Show/hide Spell It button with Read Aloud
+  const spellBtn = document.getElementById('spellToggle');
+  spellBtn.style.display = autoSpeak ? '' : 'none';
+  if (!autoSpeak) {
+    autoSpell = false;
+    spellBtn.textContent = '🔤 Spell It: Off';
+    spellBtn.classList.remove('active');
+  }
   if (autoSpeak) speakWord(deck[idx]);
   else speechSynthesis.cancel();
 }

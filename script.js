@@ -1,4 +1,26 @@
-// ── Word list, utilities, render, navigation, font functions, etc.
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║                                                                  ║
+// ║                        ⭐  DAGNY'S WORDS  ⭐                    ║
+// ║                      Sight Word Flash Card App                   ║
+// ║                         (c) 2026 CR Chapman                      ║
+// ║                                                                  ║
+// ║   Features:                                                      ║
+// ║   • Randomised sight word flashcards                             ║
+// ║   • Dyslexia-friendly font selection                             ║
+// ║   • Text-to-speech read aloud                                    ║
+// ║   • Letter-by-letter phonetic spelling                           ║
+// ║   • Load word lists from .txt files                              ║
+// ║   • Settings persisted in localStorage                           ║
+// ║                                                                  ║
+// ║   Keyboard shortcuts:                                            ║
+// ║   SPACE / → — next word                                          ║
+// ║   ←         — previous word                                      ║
+// ║   R         — reshuffle deck                                     ║
+// ║   S         — replay speech                                      ║
+// ║                                                                  ║
+// ╚══════════════════════════════════════════════════════════════════╝
+
+// ── Word list ─────────────────────────────────────────────────────────────────
 const DEFAULTS = [
   "the","this","here","looks","said","have","come","some","there","they",
   "where","were","what","who","would","could","should","want","like",

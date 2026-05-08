@@ -50,6 +50,19 @@ function loadVoices() {
     opt.textContent = `${v.name} (${v.lang})`;
     sel.appendChild(opt);
   });
+  // Restore saved voice after dropdown is populated
+  try {
+    const s = JSON.parse(localStorage.getItem('dagny-settings'));
+
+    console.log('s:', s);
+    console.log('voiceIdx raw value:', s?.voiceIdx, '| type:', typeof s?.voiceIdx);
+
+    if (s && s.voiceIdx !== '' && s.voiceIdx !== null && s.voiceIdx !== undefined) {
+      console.log('Restoring saved voice index:', s.voiceIdx);
+      sel.value = s.voiceIdx;
+      chosenVoice = voices[parseInt(s.voiceIdx)] || null;
+    }    
+  } catch(e) {}
 }
 
 loadVoices();
@@ -74,7 +87,7 @@ function speakWord(word) {
   speechSynthesis.cancel();
 
   const rate = parseFloat(document.getElementById('speedSel').value);
-  const PHONETIC = { a:'ate', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
+  const PHONETIC = { a:'eigh', e:'ee', i:'eye', o:'owe', u:'you', y:'why', j:'jay', z:'zed' };
 
   function makeUtt(text, r, pitch) {
     const utt = new SpeechSynthesisUtterance(text);
@@ -247,17 +260,25 @@ function saveWords() {
 
 // ── Settings persistence ──────────────────────────────────────────────────────
 function saveSettings() {
+  let existingVoiceIdx = '';
+  if (voices.length === 0) {
+    try {
+      existingVoiceIdx = JSON.parse(localStorage.getItem('dagny-settings'))?.voiceIdx ?? '';
+    } catch(e) {}
+  }
+
   const settings = {
     font:      document.getElementById('fontSel').value,
     fontSize:  document.getElementById('sizeSel').value,
     session:   document.getElementById('sessionSel').value,
     caps:      document.getElementById('capsSel').value,
     speed:     document.getElementById('speedSel').value,
-    voiceIdx:  document.getElementById('voiceSel').value,
+    voiceIdx:  voices.length > 0 ? document.getElementById('voiceSel').value : existingVoiceIdx,
     autoSpeak,
     autoSpell,
   };
   localStorage.setItem('dagny-settings', JSON.stringify(settings));
+  console.log('Saved settings:', settings);
 }
 
 function loadSettings() {
@@ -269,7 +290,10 @@ function loadSettings() {
   if (s.session)  document.getElementById('sessionSel').value  = s.session;
   if (s.caps)     document.getElementById('capsSel').value     = s.caps;
   if (s.speed)    document.getElementById('speedSel').value    = s.speed;
-  if (s.voiceIdx) document.getElementById('voiceSel').value    = s.voiceIdx;
+  // if (s.voiceIdx) document.getElementById('voiceSel').value    = s.voiceIdx;
+
+  console.log('Loaded settings:', s);
+
   return s;
 }
 

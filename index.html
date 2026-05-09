@@ -96,12 +96,20 @@
         <div class="font-note">English voices only</div>
       </div>
       <div class="ctrl">
-        <label>Speed</label>
+        <label>Read-Aloud Speed</label>
         <div class="slider-row">
           <input type="range" id="speedSel" min="0.5" max="1.5" value="1.0" step="0.05" oninput="updateSpeedLabel()">
           <span class="size-val" id="speedVal">0.85×</span>
         </div>
         <div class="font-note">Slower helps comprehension</div>
+      </div>
+      <div class="ctrl">
+        <label>Spell-Aloud Speed</label>
+        <div class="slider-row">
+          <input type="range" id="spellSpeedSel" min="0.5" max="4.0" value="1.65" step="0.05" oninput="updateSpellSpeedLabel()">
+          <span class="size-val" id="spellSpeedVal">1.65×</span>
+        </div>
+        <div class="font-note">Letter-by-letter rate</div>
       </div>
     </div>
   </div>

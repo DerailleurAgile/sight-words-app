@@ -79,8 +79,8 @@ let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
-const spellSpeedMultiplier = 2.5; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
 let currentWordListName = '';
+const spellSpeedMultiplier = parseFloat(document.getElementById('spellSpeedSel').value);
 
 // ── Speech ────────────────────────────────────────────────────────────────────
 function loadVoices() {
@@ -124,6 +124,12 @@ function applyVoice() {
 function updateSpeedLabel() {
   const v = parseFloat(document.getElementById('speedSel').value).toFixed(2);
   document.getElementById('speedVal').textContent = `${v}×`;
+  saveSettings();
+}
+
+function updateSpellSpeedLabel() {
+  const v = parseFloat(document.getElementById('spellSpeedSel').value).toFixed(2);
+  document.getElementById('spellSpeedVal').textContent = `${v}×`;
   saveSettings();
 }
 
@@ -343,6 +349,7 @@ function saveSettings() {
     autoSpell,
     wordList:     [...words], // Store the current word list in settings for persistence
     wordListName: currentWordListName, // Store the name of the currently loaded word list
+    spellSpeed: document.getElementById('spellSpeedSel').value,
   };
   localStorage.setItem('dagny-settings', JSON.stringify(settings));
   console.log('Saved settings:', settings);
@@ -357,6 +364,7 @@ function loadSettings() {
   if (s.session)  document.getElementById('sessionSel').value  = s.session;
   if (s.caps)     document.getElementById('capsSel').value     = s.caps;
   if (s.speed)    document.getElementById('speedSel').value    = s.speed;
+  if (s.spellSpeed) document.getElementById('spellSpeedSel').value = s.spellSpeed;
   // if (s.voiceIdx) document.getElementById('voiceSel').value    = s.voiceIdx;
 
   console.log('Loaded settings:', s);
@@ -418,6 +426,8 @@ async function init() {
   document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
   document.getElementById('speedVal').textContent   =
     parseFloat(document.getElementById('speedSel').value).toFixed(2) + '×';
+  document.getElementById('spellSpeedVal').textContent =
+    parseFloat(document.getElementById('spellSpeedSel').value).toFixed(2) + '×';
   
   buildDots();
   applyFont();

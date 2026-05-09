@@ -193,7 +193,7 @@ function toggleSpeech() {
 let words      = [...DEFAULTS];
 let deck       = [];
 let idx        = 0;
-let randomCaps = false;
+let capsMode = 'off'
 
 function shuffle(arr) {
   const a = [...arr];
@@ -205,11 +205,14 @@ function shuffle(arr) {
 }
 
 function formatWord(word) {
-  if (randomCaps && Math.random() > 0.5) {
-    return word.charAt(0).toUpperCase() + word.slice(1);
+  switch (capsMode) {
+    case 'first':  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    case 'all':    return word.toUpperCase();
+    case 'random': return Math.random() > 0.5
+                     ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                     : word.toLowerCase();
+    default:       return word === 'I' ? 'I' : word.toLowerCase();
   }
-  if (word === 'I') return "I";
-  return word.toLowerCase();
 }
 
 function buildDots() {
@@ -287,7 +290,7 @@ function applyFont() {
 }
 
 function updateCaps() {
-  randomCaps = document.getElementById('capsSel').value === 'random';
+  capsMode = document.getElementById('capsSel').value;
   document.getElementById('wordEl').textContent = formatWord(deck[idx]);
   saveSettings();
 }
@@ -411,7 +414,8 @@ async function init() {
   words = [...DEFAULTS];
   
   const saved = loadSettings();
-
+  capsMode = document.getElementById('capsSel').value;
+  
   if (saved?.wordList?.length) {           
     words = saved.wordList;
     currentWordListName = saved.wordListName || '';
@@ -451,7 +455,6 @@ async function init() {
   
   buildDots();
   applyFont();
-  randomCaps = document.getElementById('capsSel').value === 'random';
   speakWord(deck[0]);
 }
 

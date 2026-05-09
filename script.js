@@ -255,6 +255,7 @@ function reshuffle() {
 }
 
 function updateSession() {
+  saveSettings();
   reshuffle();
 }
 

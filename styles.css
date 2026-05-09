@@ -128,6 +128,15 @@
     transform: scale(0.88) translateY(-10px);
   }
 
+  .word-list-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    min-height: 18px;
+    text-align: center;
+  }
+
   .nav-hint {
     display: flex;
     gap: 10px;

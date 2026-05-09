@@ -301,7 +301,8 @@ function saveWords() {
   const parsed = raw.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
   if (!parsed.length) return;
   words = parsed;
-  saveSettings(); // Save the new word list to settings for persistence
+  saveSettings();
+  updateWordListLabel(); 
   reshuffle();
   toggleEditor();
 }
@@ -311,8 +312,15 @@ function restoreDefaults() {
   currentWordListName = '';
   document.getElementById('wordArea').value = words.join('\n');
   saveSettings();
+  updateWordListLabel();
   reshuffle();
   toggleEditor();
+}
+
+function updateWordListLabel() {
+  const el = document.getElementById('wordListLabel');
+  if (!el) return;
+  el.textContent = currentWordListName ? `📂 ${currentWordListName}` : '';
 }
 
 // ── Settings persistence ──────────────────────────────────────────────────────
@@ -399,6 +407,7 @@ async function init() {
     words = saved.wordList;
     currentWordListName = saved.wordListName || '';
   }
+  updateWordListLabel();
 
   const limit = document.getElementById('sessionSel').value;
   const count = limit === 'all' ? words.length : parseInt(limit);

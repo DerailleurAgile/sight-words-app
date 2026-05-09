@@ -418,22 +418,6 @@ async function init() {
   }
   updateWordListLabel();
 
-  const limit = document.getElementById('sessionSel').value;
-  const count = limit === 'all' ? words.length : parseInt(limit);
-  deck = shuffle(words).slice(0, count);
-  idx  = 0;
-  
-  document.getElementById('wordEl').textContent     = formatWord(deck[0]);
-  document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
-  document.getElementById('speedVal').textContent   =
-    parseFloat(document.getElementById('speedSel').value).toFixed(2) + '×';
-  document.getElementById('spellSpeedVal').textContent =
-    parseFloat(document.getElementById('spellSpeedSel').value).toFixed(2) + '×';
-  
-  buildDots();
-  applyFont();
-  randomCaps = document.getElementById('capsSel').value === 'random';
-
   // Restore or default autoSpeak on
   const wantSpeak = saved ? saved.autoSpeak !== false : true;
   const wantSpell = saved ? saved.autoSpell === true  : true;
@@ -453,6 +437,21 @@ async function init() {
     }
   }
 
+  const limit = document.getElementById('sessionSel').value;
+  const count = limit === 'all' ? words.length : parseInt(limit);
+  deck = shuffle(words).slice(0, count);
+  idx  = 0;
+  
+  document.getElementById('wordEl').textContent     = formatWord(deck[0]);
+  document.getElementById('countBadge').textContent = `1 / ${deck.length}`;
+  document.getElementById('speedVal').textContent   =
+    parseFloat(document.getElementById('speedSel').value).toFixed(2) + '×';
+  document.getElementById('spellSpeedVal').textContent =
+    parseFloat(document.getElementById('spellSpeedSel').value).toFixed(2) + '×';
+  
+  buildDots();
+  applyFont();
+  randomCaps = document.getElementById('capsSel').value === 'random';
   speakWord(deck[0]);
 }
 

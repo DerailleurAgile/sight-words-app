@@ -79,7 +79,7 @@ let autoSpeak  = false;
 let autoSpell  = false;
 let voices     = [];
 let chosenVoice = null;
-const spellSpeedMultiplier = 3.0; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
+const spellSpeedMultiplier = 2.5; // Spell out letters relative to word speed (e.g. 1.35 = 35% faster than word rate)
 let currentWordListName = '';
 
 // ── Speech ────────────────────────────────────────────────────────────────────

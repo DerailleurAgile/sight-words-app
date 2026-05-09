@@ -406,8 +406,8 @@
     background: var(--sky);
     border: 1.5px solid var(--border);
     border-radius: 50%;
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
     font-size: 1.1rem;
     cursor: pointer;
     display: none;
